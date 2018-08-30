@@ -19,8 +19,8 @@ public class SimpleRNN extends Recurrent {
 
     @Override
     public void recurrentConnectTo(Layer previousLayer) {
-        this.w = this.initializer.handle(new int[]{this.nin, this.nout});
-        this.u = this.innerInitializer.handle(new int[]{this.nout, this.nout});
+        this.w = this.initializer.handle(new long[]{this.nin, this.nout});
+        this.u = this.innerInitializer.handle(new long[]{this.nout, this.nout});
         this.b = Nd4j.zeros(this.nout);
     }
 
@@ -28,9 +28,9 @@ public class SimpleRNN extends Recurrent {
     public INDArray forward(INDArray input) {
         assert(input.length() == 3);//, 'Only support batch training.'
         this.lastInput = input;
-        int nbBatch = input.shape()[0];
-        int nbTimestep = input.shape()[1];
-        int nbIn = input.shape()[2];
+        long nbBatch = input.shape()[0];
+        long nbTimestep = input.shape()[1];
+        long nbIn = input.shape()[2];
 
         INDArray output = Nd4j.zeros(nbBatch, nbTimestep, this.nout);
 

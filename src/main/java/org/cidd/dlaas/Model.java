@@ -72,7 +72,7 @@ public class Model {
                 Nd4j.shuffle(trainy, random, 0);
             }
 
-            int size = trainy.shape()[0] / batchSize;
+            long size = trainy.shape()[0] / batchSize;
 
             List<INDArray> trainLosses = new ArrayList<>();
             List<INDArray> trainPredicts = new ArrayList<>();
@@ -135,7 +135,7 @@ public class Model {
 
             if (validx != null && validy != null) {
 
-                int sizeValid = validy.shape()[0] / batchSize;
+                long sizeValid = validy.shape()[0] / batchSize;
 
                 List<INDArray> validLosses = new ArrayList<>();
                 List<INDArray> validPredicts = new ArrayList<>();

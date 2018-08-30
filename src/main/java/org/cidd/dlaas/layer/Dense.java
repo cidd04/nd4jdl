@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 public class Dense extends Layer {
 
-    private int nout;
-    private int nin;
+    private long nout;
+    private long nin;
     private INDArray w;
     private INDArray b;
     private INDArray dw;
@@ -28,21 +28,21 @@ public class Dense extends Layer {
     private INDArray lastInput;
 
     public Dense init() {
-        this.outShape = new int[2];
+        this.outShape = new long[2];
         this.outShape[1] = nout;
         return this;
     }
 
     @Override
     public void connectTo(Layer previousLayer) {
-        int nin;
+        long nin;
         if (previousLayer == null) {
             nin = this.nin;
         } else {
             int len = previousLayer.getOutShape().length;
             nin = previousLayer.getOutShape()[len - 1];
         }
-        this.w = initializer.handle(new int[]{nin, this.nout});
+        this.w = initializer.handle(new long[]{nin, this.nout});
 //        this.w = Nd4j.zeros(nin, this.nout);
 //        this.w = Nd4j.ones(nin, this.nout);
         this.b = Nd4j.zeros(this.nout);

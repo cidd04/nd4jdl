@@ -14,7 +14,7 @@ public class Uniform implements Initializer {
     private double scale;
 
     @Override
-    public INDArray handle(int[] size) {
+    public INDArray handle(long[] size) {
         return Nd4j.rand(size, -scale, scale, Nd4j.getRandom());
     }
 }

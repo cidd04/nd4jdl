@@ -16,16 +16,16 @@ public class Orthogonal implements Initializer {
     private double gain;
 
     @Override
-    public INDArray handle(int[] size) {
-        int[] flatShape = new int[2];
+    public INDArray handle(long[] size) {
+        long[] flatShape = new long[2];
         flatShape[0] = size[0];
-        int prod = 1;
+        long prod = 1;
         for (int i = 1; i < size.length; i++)
             prod *= size[i];
         flatShape[1] = prod;
         INDArray a = Nd4j.randn(flatShape);
-        int m = a.rows();
-        int n = a.columns();
+        long m = a.rows();
+        long n = a.columns();
         INDArray u = Nd4j.create(m < n ? m : n);
         INDArray vt = Nd4j.create(n, n, 'f');
         Nd4j.getNDArrayFactory().lapack().gesvd(a, u, null, vt);

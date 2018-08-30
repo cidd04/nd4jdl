@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class Layer {
 
     protected boolean firstLayer;
-    protected int[] outShape;
+    protected long[] outShape;
 
     public abstract void connectTo(Layer layer);
     public abstract INDArray forward(INDArray input);

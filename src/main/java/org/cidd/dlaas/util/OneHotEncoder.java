@@ -7,7 +7,7 @@ public class OneHotEncoder {
 
     public static INDArray encode(INDArray labels) {
         INDArray classes = GeneralUtils.unique(labels);
-        int nbclasses = classes.shape()[0];
+        long nbclasses = classes.shape()[0];
         INDArray oneHotLabels = Nd4j.zeros(labels.shape()[0], nbclasses);
         for (int i = 0; i < labels.shape()[0]; i++) {
             for (int j = 0; j < nbclasses; j++) {

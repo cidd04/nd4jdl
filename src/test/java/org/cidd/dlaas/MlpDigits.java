@@ -28,7 +28,7 @@ public class MlpDigits {
         INDArray ytrain = Nd4j.readNumpy(ClassLoader
                 .getSystemResource("data/digitstarget.csv")
                 .getPath(), ",");
-        int nclasses = GeneralUtils.unique(ytrain).shape()[0];
+        long nclasses = GeneralUtils.unique(ytrain).shape()[0];
 
         //model
         Model model = Model.builder().build().init();

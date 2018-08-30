@@ -7,10 +7,10 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public abstract class Recurrent extends Layer {
 
-    protected int nout;
-    protected int nin;
-    protected int nbBatch;
-    protected int nbSeq;
+    protected long nout;
+    protected long nin;
+    protected long nbBatch;
+    protected long nbSeq;
     protected Initializer initializer;
     protected Initializer innerInitializer;
     protected Activation activationCls;
@@ -35,12 +35,12 @@ public abstract class Recurrent extends Layer {
         }
 
         if (this.returnSequence) {
-            this.outShape = new int[3];
+            this.outShape = new long[3];
             this.outShape[0] = this.nbBatch;
             this.outShape[1] = this.nbSeq;
             this.outShape[2] = this.nout;
         } else {
-            this.outShape = new int[2];
+            this.outShape = new long[2];
             this.outShape[0] = this.nbBatch;
             this.outShape[1] = this.nout;
         }
