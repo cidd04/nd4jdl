@@ -54,6 +54,15 @@ public class SimpleRNN extends Recurrent {
 
         // hiddens.shape == (nb_timesteps, nb_batch, nb_out)
         INDArray hiddens = this.lastOutput.swapAxes(0, 1).transpose();
+        if (this.returnSequence) {
+            input = input.swapAxes(0, 1).transpose();
+            assert hiddens.shape() == input.shape();
+            long nbTimesteps = input.shape()[0];
+            INDArray layerGrad = Nd4j.zeros(input.shape());
+            for (int i = 0; i < Nd4j.arange(nbTimesteps).size(0); i++) {
+//                INDArray delta = input[]
+            }
+        }
 
         return null;
     }
