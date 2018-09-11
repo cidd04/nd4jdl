@@ -34,16 +34,37 @@ public class BatchLSTM extends Recurrent {
         // bias
         if (this.forgetBiasSum != 0) {
             // self.AllW[0, self.n_out: 2 * self.n_out] = self.forget_bias_num
-            this.allw.put(new INDArrayIndex[]{
-                    NDArrayIndex.point(0), NDArrayIndex.interval(this.nout, this.nout*2)
-            }, this.forgetBiasSum);
+            this.allw.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.interval(this.nout, this.nout*2)},
+                    this.forgetBiasSum);
         }
 
         // Weights matrices for input x
-//        .put(NDArrayIndex..interval(0,1), 1);
-        this.allw.put(new INDArrayIndex[]{NDArrayIndex.all(), NDArrayIndex.point(2)}, 1);     //All rows, column index 2
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*0, this.nout*1)},
+                initializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*1, this.nout*2)},
+                initializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*2, this.nout*3)},
+                initializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*3, this.nout*4)},
+                initializer.handle(new long[]{this.nin, this.nout}));
 
-
+        // Weights matrices for memory cell
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*0, this.nout*1)},
+                innerInitializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*1, this.nout*2)},
+                innerInitializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*2, this.nout*3)},
+                innerInitializer.handle(new long[]{this.nin, this.nout}));
+        this.allw.put(new INDArrayIndex[]{NDArrayIndex.interval(1, this.nin+1),
+                        NDArrayIndex.interval(this.nout*3, this.nout*4)},
+                innerInitializer.handle(new long[]{this.nin, this.nout}));
     }
 
     @Override
