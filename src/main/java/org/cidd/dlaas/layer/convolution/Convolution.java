@@ -5,8 +5,12 @@ import org.cidd.dlaas.initialization.Initializer;
 import org.cidd.dlaas.layer.Layer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Convolution extends Layer {
 
@@ -87,12 +91,17 @@ public class Convolution extends Layer {
             long hshift = h * this.stride;
             long wshift = w * this.stride;
             // patch
-            //todo
+            INDArray patch = input.get(
+              NDArrayIndex.point(x),
+              NDArrayIndex.all(),
+              NDArrayIndex.interval(hshift, hshift + filterh),
+              NDArrayIndex.interval(wshift, wshift + filterw));
+            INDArray sum = Nd4j.sum(patch.mul(this.w.getColumn(y).add(this.b.getColumn(y))));
+            outputs.put(new int[]{x, y, h, w}, sum);
           }
         }
       }
     }
-
     // nonlinear activation
     this.lastOutput = this.activation.forward(outputs);
 
@@ -101,27 +110,102 @@ public class Convolution extends Layer {
 
   @Override
   public INDArray backward(INDArray input) {
+    // shape
+    assert input.shape().length == this.lastOutput.shape().length;
+    long nbBatch = this.lastInput.shape()[0];
+    long inputDepth = this.lastInput.shape()[1];
+    long oldImgh = this.lastInput.shape()[2];
+    long oldImgw = this.lastInput.shape()[3];
+
+    long filterh = this.filterSize[0];
+    long filterw = this.filterSize[1];
+
+    long newImgh = this.outShape[2];
+    long newImgw = this.outShape[3];
+
+    // gradients
+    this.dw = Nd4j.zeros(this.w.shape());
+    this.db = Nd4j.zeros(this.b.shape());
+    INDArray delta = input.mul(this.activation.derivative(null));
+
+    // dw
+    for (int r = 0; r < this.nbFilter; r++) {
+      for (int t = 0; t < inputDepth; t++) {
+        for (int h = 0; h < filterh; h++) {
+          for (int w = 0; w < filterw; w++) {
+            INDArray inputWindow = this.lastInput.get(
+              NDArrayIndex.all(),
+              NDArrayIndex.point(t),
+              NDArrayIndex.interval(h, this.stride, oldImgh - filterh + h + 1),
+              NDArrayIndex.interval(w, this.stride, oldImgw - filterw + w + 1)
+            );
+            INDArray deltaWindow = delta.get(NDArrayIndex.all(), NDArrayIndex.point(r));
+            this.dw.put(new int[]{r, t, h, w}, Nd4j.sum(inputWindow.mul(deltaWindow)).div(nbBatch));
+          }
+        }
+      }
+    }
+
+    // db
+    for (int r = 0; r < this.nbFilter; r++) {
+      this.db.put(r, Nd4j.sum(delta.get(NDArrayIndex.all(), NDArrayIndex.point(r))).div(nbBatch));
+    }
+
+    // dx
+    if (!this.firstLayer) {
+      INDArray layerGrads = Nd4j.zeros(this.lastInput.shape());
+      for (int b = 0; b < nbBatch; b++) {
+        for (int r = 0; b < this.nbFilter; b++) {
+          for (int t = 0; b < inputDepth; b++) {
+            for (int h = 0; b < newImgh; b++) {
+              for (int w = 0; b < newImgw; b++) {
+                long hshift = h * this.stride;
+                long wshift = w * this.stride;
+                INDArrayIndex[] indices = new INDArrayIndex[]{
+                  NDArrayIndex.point(b),
+                  NDArrayIndex.point(t),
+                  NDArrayIndex.interval(hshift, hshift + filterh),
+                  NDArrayIndex.interval(wshift, wshift + filterw)
+                };
+                INDArray currentLayerGrad = layerGrads.get(indices);
+                currentLayerGrad = currentLayerGrad.add(this.w.get(NDArrayIndex.point(r), NDArrayIndex.point(t))
+                  .mul(delta.get(
+                    NDArrayIndex.point(b),
+                    NDArrayIndex.point(r),
+                    NDArrayIndex.point(h),
+                    NDArrayIndex.point(w)
+                )));
+                layerGrads.put(indices, currentLayerGrad);
+              }
+            }
+          }
+        }
+      }
+      return layerGrads;
+    }
     return null;
   }
 
   @Override
   public List<INDArray> getParams() {
-    return null;
+    return Stream.of(this.w, this.b).collect(Collectors.toList());
   }
 
   @Override
   public void setParams(List<INDArray> params) {
-
+    this.w = params.get(0);
+    this.b = params.get(1);
   }
 
   @Override
   public List<INDArray> getGrads() {
-    return null;
+    return Stream.of(this.dw, this.db).collect(Collectors.toList());
   }
 
   @Override
   public void setGrads(List<INDArray> grads) {
-
+    this.dw = grads.get(0);
+    this.db = grads.get(1);
   }
 
 }
